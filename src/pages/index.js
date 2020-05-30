@@ -1,21 +1,50 @@
 import React from "react"
-import { Link } from "gatsby"
-
+import { graphql } from "gatsby"
 import Layout from "../components/layout"
-import Image from "../components/image"
-import SEO from "../components/seo"
 
-const IndexPage = () => (
+const IndexPage = ({ data }) => (
   <Layout>
-    <SEO title="Home" />
-    <h1>Hi people</h1>
-    <p>Welcome to your new Gatsby site.</p>
-    <p>Now go build something great.</p>
-    <div style={{ maxWidth: `300px`, marginBottom: `1.45rem` }}>
-      <Image />
-    </div>
-    <Link to="/page-2/">Go to page 2</Link>
+    {data.allContentfulPost.edges.map(edge => {
+      const author = edge.node.author
+      return <div>
+        <h2>{edge.node.title}</h2>
+        
+        {/* ↓ここは存在しない可能性がある一番親に近い物を設置する（× edge.node.author.avatar 理由：authorがないパターンがあるから） */}
+        { edge.node.author && 
+          <img width={20} src={author.avatar.fixed.src} alt={author.name} />
+        }
+        { edge.node.author && 
+          <small>{author.name}</small>
+        }
+        <p>{edge.node.text.text}</p>
+      </div>
+    })}
   </Layout>
 )
+
+export const query = graphql`
+{
+  allContentfulPost {
+    edges {
+      node {
+        title
+        text {
+          text
+        }
+        author {
+          name
+          description
+          avatar {
+            fixed(width: 10) {
+              height
+              src
+            }
+          }
+        }
+      }
+    }
+  }
+}
+`
 
 export default IndexPage
